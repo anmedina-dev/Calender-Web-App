@@ -1,38 +1,33 @@
+import React from "react";
 import {
   useSession,
-  signOut,
+  signIn,
   getSession,
   GetSessionParams,
 } from "next-auth/react";
 import { GetServerSideProps } from "next";
 
-export default function Home() {
-  const { data: session, status } = useSession();
+export default function login() {
+  const { data: session } = useSession();
 
-  if (status !== "authenticated") {
+  if (!session) {
     return (
       <div>
         <p>You are not Signed in</p>
+        <button onClick={() => signIn()}>Sign In</button>
       </div>
     );
   }
-
-  return (
-    <div>
-      <p>{session?.user?.name}</p>
-      You are signed in<button onClick={() => signOut()}>SignOut</button>
-    </div>
-  );
 }
 
 export const getServerSideProps = async (
   context: GetSessionParams | undefined
 ) => {
   const session = await getSession(context);
-  if (!session) {
+  if (session) {
     return {
       redirect: {
-        destination: "/login",
+        destination: "/",
       },
     };
   }
