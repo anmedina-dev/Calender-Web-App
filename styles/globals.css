@@ -4,6 +4,7 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    height: 100%;
 }
 
 a {
@@ -16,11 +17,9 @@ a {
 }
 
 @media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+
   body {
-    color: white;
-    background: black;
+    color: black;
+    background-image: radial-gradient(circle, #dad6d5, #c2bfbf, #aba9aa, #949394, #7e7e7e);
   }
 }

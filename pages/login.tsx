@@ -5,7 +5,6 @@ import {
   getSession,
   GetSessionParams,
 } from "next-auth/react";
-import { GetServerSideProps } from "next";
 
 export default function login() {
   const { data: session } = useSession();
