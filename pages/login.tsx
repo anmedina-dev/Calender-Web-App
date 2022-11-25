@@ -7,6 +7,7 @@ import {
 } from "next-auth/react";
 
 export default function login() {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { data: session } = useSession();
 
   if (!session) {

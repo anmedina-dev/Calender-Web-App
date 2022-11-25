@@ -5,20 +5,47 @@ import {
   GetSessionParams,
 } from "next-auth/react";
 import {
-  FormControl,
-  Input,
+  FormGroup,
   TextField,
   ThemeProvider,
   createTheme,
   CssBaseline,
+  Button,
 } from "@mui/material";
-import dayjs, { Dayjs } from "dayjs";
 import styles from "../styles/index.module.css";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
+import db from "../firebase/config";
 import Image from "next/image";
-import { useState } from "react";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import { useEffect, useState } from "react";
+
+type CalenderType = {
+  id: string;
+  date: Date;
+  email: string;
+  hours: number;
+  leetcode: string;
+  link: string;
+  worked_on: string;
+  learned: string;
+};
+
+type FormType = {
+  hours: number;
+  leetcode: string;
+  link: string;
+  worked_on: string;
+  learned: string;
+};
 
 export default function Home() {
   const darkTheme = createTheme({
@@ -28,10 +55,75 @@ export default function Home() {
   });
   const { data: session, status } = useSession();
 
-  const [value, setValue] = useState<Dayjs | null>(dayjs());
-  const handleChange = (newValue: Dayjs | null) => {
-    setValue(newValue);
-  };
+  const [value, onChange] = useState(new Date());
+  const [userData, setUserData] = useState<CalenderType[]>([]);
+  const [formData, setFormData] = useState<FormType>({
+    hours: 0,
+    leetcode: "",
+    link: "",
+    worked_on: "",
+    learned: "",
+  });
+
+  useEffect(() => {
+    (async () => {
+      const colRef = collection(db, "calender");
+      const q = query(colRef, where("email", "==", session?.user?.email));
+      const docs = await getDocs(q);
+      const tempData: Array<CalenderType> = Array();
+      docs.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        let obj: CalenderType = {
+          id: doc.id,
+          date: new Timestamp(
+            doc.data().date.seconds,
+            doc.data().date.nanoseconds
+          ).toDate(),
+          email: doc.data().email,
+          hours: doc.data().hours,
+          leetcode: doc.data().leetcode,
+          link: doc.data().link,
+          worked_on: doc.data().worked_on,
+          learned: doc.data().learned,
+        };
+        tempData.push(obj);
+      });
+      setUserData(tempData);
+    })();
+  }, [session?.user?.email]);
+
+  useEffect(() => {
+    console.log(userData);
+  }, [userData]);
+
+  useEffect(() => {
+    const dataDate = userData.find(
+      (element) => element.date.getDate() === value.getDate()
+    );
+
+    if (!dataDate) {
+      let formObj: FormType = {
+        hours: 0,
+        learned: "",
+        leetcode: "",
+        link: "",
+        worked_on: "",
+      };
+      setFormData(formObj);
+      return;
+    }
+    console.log(dataDate);
+    console.log(value);
+    let obj: FormType = {
+      hours: dataDate?.hours!,
+      learned: dataDate?.learned!,
+      leetcode: dataDate?.leetcode!,
+      link: dataDate?.link!,
+      worked_on: dataDate?.worked_on!,
+    };
+    setFormData(obj);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
 
   if (status !== "authenticated") {
     return (
@@ -40,6 +132,75 @@ export default function Home() {
       </div>
     );
   }
+
+  const handleSubmit = () => {
+    const dataDate = userData.find(
+      (element) => element.date.getDate() === value.getDate()
+    );
+    if (!dataDate) {
+      const colRef = doc(collection(db, "calender"));
+      setDoc(colRef, {
+        date: value,
+        email: session.user?.email,
+        hours: formData.hours,
+        learned: formData.learned,
+        leetcode: formData.leetcode,
+        link: formData.link,
+        worked_on: formData.worked_on,
+      });
+      return;
+    }
+    const colRef = doc(db, "calender", dataDate?.id);
+    setDoc(
+      colRef,
+      {
+        date: value,
+        email: session.user?.email,
+        hours: formData.hours,
+        learned: formData.learned,
+        leetcode: formData.leetcode,
+        link: formData.link,
+        worked_on: formData.worked_on,
+      },
+      { merge: true }
+    ).then(() => {
+      console.log("Document Added");
+    });
+  };
+
+  const handleWorkedOnChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    setFormData({ ...formData, worked_on: event.target.value });
+  };
+
+  const handleHoursChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    if (!event.target.value) {
+      setFormData({ ...formData, hours: 0 });
+      return;
+    }
+    setFormData({ ...formData, hours: parseInt(event.target.value) });
+  };
+
+  const handleLeetCodeChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    setFormData({ ...formData, leetcode: event.target.value });
+  };
+
+  const handleLinkChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    setFormData({ ...formData, link: event.target.value });
+  };
+
+  const handleLearnedChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    setFormData({ ...formData, learned: event.target.value });
+  };
 
   const userImage = session.user?.image;
 
@@ -84,26 +245,53 @@ export default function Home() {
             </div>
           </div>
           <div className={styles.main_section}>
-            <FormControl className={styles.form_section}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DesktopDatePicker
-                  label="Date"
-                  inputFormat="MM/DD/YYYY"
-                  value={value}
-                  onChange={handleChange}
-                  renderInput={(params) => (
-                    <TextField
-                      required
-                      id="outlined-required"
-                      color="primary"
-                      {...params}
-                    />
-                  )}
-                />
-              </LocalizationProvider>
-              <TextField required id="outlined-required" label="Required" />
-            </FormControl>
-            <div className={styles.calender_section}>Hello</div>
+            <FormGroup className={styles.form_section}>
+              <TextField
+                required
+                id="outlined-required"
+                label="What did you work on"
+                multiline
+                rows={2}
+                value={formData.worked_on}
+                onChange={handleWorkedOnChange}
+              />
+              <TextField
+                required
+                id="outlined-required"
+                label="How many hours"
+                value={formData.hours}
+                onChange={handleHoursChange}
+              />
+              <TextField
+                id="outlined-required"
+                label="Leet Code Question"
+                multiline
+                rows={2}
+                value={formData.leetcode}
+                onChange={handleLeetCodeChange}
+              />
+              <TextField
+                id="outlined-required"
+                label="Link"
+                value={formData.link}
+                onChange={handleLinkChange}
+              />
+              <TextField
+                required
+                id="outlined-required"
+                label="Fact you learned today"
+                multiline
+                rows={4}
+                value={formData.learned}
+                onChange={handleLearnedChange}
+              />
+              <Button variant="contained" onClick={handleSubmit}>
+                Submit
+              </Button>
+            </FormGroup>
+            <div className={styles.calender_section}>
+              <Calendar onChange={onChange} value={value} />
+            </div>
           </div>
         </div>
       </ThemeProvider>

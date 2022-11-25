@@ -51,3 +51,9 @@
 .form_section>*{
     margin: 15px;
 }
+
+.calender_section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
