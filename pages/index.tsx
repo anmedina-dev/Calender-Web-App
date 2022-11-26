@@ -68,44 +68,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      const colRef = collection(db, "calender");
-      const q = query(colRef, where("email", "==", session?.user?.email));
-      const docs = await getDocs(q);
-      const tempData: Array<CalenderType> = Array();
-      docs.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        let obj: CalenderType = {
-          id: doc.id,
-          date: new Timestamp(
-            doc.data().date.seconds,
-            doc.data().date.nanoseconds
-          ).toDate(),
-          email: doc.data().email,
-          hours: doc.data().hours,
-          leetcode: doc.data().leetcode,
-          link: doc.data().link,
-          worked_on: doc.data().worked_on,
-          learned: doc.data().learned,
-        };
-        tempData.push(obj);
-      });
-      const dataDate = tempData.find(
-        (element) => element.date.getDate() === value.getDate()
-      );
-      if (dataDate) {
-        let obj: FormType = {
-          hours: dataDate?.hours!,
-          learned: dataDate?.learned!,
-          leetcode: dataDate?.leetcode!,
-          link: dataDate?.link!,
-          worked_on: dataDate?.worked_on!,
-        };
-        setFormData(obj);
-      }
-      setUserData(tempData);
-      setIsLoading(false);
-    })();
+    getData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.email]);
 
@@ -150,6 +113,47 @@ export default function Home() {
     );
   }
 
+  const getData = () => {
+    (async () => {
+      const colRef = collection(db, "calender");
+      const q = query(colRef, where("email", "==", session?.user?.email));
+      const docs = await getDocs(q);
+      const tempData: Array<CalenderType> = Array();
+      docs.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        let obj: CalenderType = {
+          id: doc.id,
+          date: new Timestamp(
+            doc.data().date.seconds,
+            doc.data().date.nanoseconds
+          ).toDate(),
+          email: doc.data().email,
+          hours: doc.data().hours,
+          leetcode: doc.data().leetcode,
+          link: doc.data().link,
+          worked_on: doc.data().worked_on,
+          learned: doc.data().learned,
+        };
+        tempData.push(obj);
+      });
+      const dataDate = tempData.find(
+        (element) => element.date.getDate() === value.getDate()
+      );
+      if (dataDate) {
+        let obj: FormType = {
+          hours: dataDate?.hours!,
+          learned: dataDate?.learned!,
+          leetcode: dataDate?.leetcode!,
+          link: dataDate?.link!,
+          worked_on: dataDate?.worked_on!,
+        };
+        setFormData(obj);
+      }
+      setUserData(tempData);
+      setIsLoading(false);
+    })();
+  };
+
   const handleSubmit = () => {
     const dataDate = userData.find(
       (element) => element.date.getDate() === value.getDate()
@@ -182,6 +186,7 @@ export default function Home() {
       { merge: true }
     ).then(() => {
       console.log("Document Added");
+      getData();
     });
   };
 
