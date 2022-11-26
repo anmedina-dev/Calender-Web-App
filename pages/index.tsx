@@ -11,6 +11,7 @@ import {
   createTheme,
   CssBaseline,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import styles from "../styles/index.module.css";
 import {
@@ -64,6 +65,7 @@ export default function Home() {
     worked_on: "",
     learned: "",
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -88,8 +90,23 @@ export default function Home() {
         };
         tempData.push(obj);
       });
+      const dataDate = tempData.find(
+        (element) => element.date.getDate() === value.getDate()
+      );
+      if (dataDate) {
+        let obj: FormType = {
+          hours: dataDate?.hours!,
+          learned: dataDate?.learned!,
+          leetcode: dataDate?.leetcode!,
+          link: dataDate?.link!,
+          worked_on: dataDate?.worked_on!,
+        };
+        setFormData(obj);
+      }
       setUserData(tempData);
+      setIsLoading(false);
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.email]);
 
   useEffect(() => {
@@ -245,53 +262,59 @@ export default function Home() {
             </div>
           </div>
           <div className={styles.main_section}>
-            <FormGroup className={styles.form_section}>
-              <TextField
-                required
-                id="outlined-required"
-                label="What did you work on"
-                multiline
-                rows={2}
-                value={formData.worked_on}
-                onChange={handleWorkedOnChange}
-              />
-              <TextField
-                required
-                id="outlined-required"
-                label="How many hours"
-                value={formData.hours}
-                onChange={handleHoursChange}
-              />
-              <TextField
-                id="outlined-required"
-                label="Leet Code Question"
-                multiline
-                rows={2}
-                value={formData.leetcode}
-                onChange={handleLeetCodeChange}
-              />
-              <TextField
-                id="outlined-required"
-                label="Link"
-                value={formData.link}
-                onChange={handleLinkChange}
-              />
-              <TextField
-                required
-                id="outlined-required"
-                label="Fact you learned today"
-                multiline
-                rows={4}
-                value={formData.learned}
-                onChange={handleLearnedChange}
-              />
-              <Button variant="contained" onClick={handleSubmit}>
-                Submit
-              </Button>
-            </FormGroup>
-            <div className={styles.calender_section}>
-              <Calendar onChange={onChange} value={value} />
-            </div>
+            {isLoading ? (
+              <CircularProgress />
+            ) : (
+              <>
+                <FormGroup className={styles.form_section}>
+                  <TextField
+                    required
+                    id="outlined-required"
+                    label="What did you work on"
+                    multiline
+                    rows={2}
+                    value={formData.worked_on}
+                    onChange={handleWorkedOnChange}
+                  />
+                  <TextField
+                    required
+                    id="outlined-required"
+                    label="How many hours"
+                    value={formData.hours}
+                    onChange={handleHoursChange}
+                  />
+                  <TextField
+                    id="outlined-required"
+                    label="Leet Code Question"
+                    multiline
+                    rows={2}
+                    value={formData.leetcode}
+                    onChange={handleLeetCodeChange}
+                  />
+                  <TextField
+                    id="outlined-required"
+                    label="Link"
+                    value={formData.link}
+                    onChange={handleLinkChange}
+                  />
+                  <TextField
+                    required
+                    id="outlined-required"
+                    label="Fact you learned today"
+                    multiline
+                    rows={4}
+                    value={formData.learned}
+                    onChange={handleLearnedChange}
+                  />
+                  <Button variant="contained" onClick={handleSubmit}>
+                    Submit
+                  </Button>
+                </FormGroup>
+                <div className={styles.calender_section}>
+                  <Calendar onChange={onChange} value={value} />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </ThemeProvider>
