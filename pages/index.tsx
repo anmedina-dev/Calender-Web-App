@@ -25,7 +25,7 @@ import {
 } from "firebase/firestore";
 import db from "../firebase/config";
 import Image from "next/image";
-import Calendar from "react-calendar";
+import Calendar, { CalendarTileProperties } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { SetStateAction, useEffect, useState } from "react";
 
@@ -74,17 +74,12 @@ export default function Home() {
   }, [session?.user?.email]);
 
   useEffect(() => {
-    // console.log(userData);
     const tempDates: SetStateAction<Date[]> = [];
     userData.forEach((date) => {
       tempDates.push(date.date);
     });
     setDates(tempDates);
   }, [userData]);
-
-  useEffect(() => {
-    console.log(dates);
-  }, [dates]);
 
   useEffect(() => {
     const dataDate = userData.find(
@@ -102,8 +97,7 @@ export default function Home() {
       setFormData(formObj);
       return;
     }
-    console.log(dataDate);
-    console.log(value);
+
     let obj: FormType = {
       hours: dataDate?.hours!,
       learned: dataDate?.learned!,
@@ -234,6 +228,16 @@ export default function Home() {
     setFormData({ ...formData, learned: event.target.value });
   };
 
+  function tileClassName({ date }: CalendarTileProperties) {
+    if (dates.find((x) => x.getTime() === date.getTime())) {
+      let highlight: string[] = [];
+      highlight.push("highlight");
+      return highlight;
+    } else {
+      return null;
+    }
+  }
+
   const userImage = session.user?.image;
 
   return (
@@ -329,12 +333,7 @@ export default function Home() {
                   <Calendar
                     onChange={onChange}
                     value={value}
-                    tileClassName={({ date }) => {
-                      if (dates.find((x) => x.getTime() === date.getTime())) {
-                        let highlight: string = "highlight";
-                        return highlight;
-                      }
-                    }}
+                    tileClassName={tileClassName}
                   />
                 </div>
               </>

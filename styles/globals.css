@@ -16,10 +16,18 @@ a {
   box-sizing: border-box;
 }
 
+.highlight {
+  background-color: rgb(123, 240, 123) !important;
+}
+
 @media (prefers-color-scheme: dark) {
 
   body {
     color: black;
     background-image: radial-gradient(circle, #dad6d5, #c2bfbf, #aba9aa, #949394, #7e7e7e);
   }
+
+  .highlight {
+    background-color: rgb(123, 240, 123) !important;
+}
 }
