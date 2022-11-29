@@ -27,7 +27,7 @@ import db from "../firebase/config";
 import Image from "next/image";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
 type CalenderType = {
   id: string;
@@ -65,6 +65,7 @@ export default function Home() {
     worked_on: "",
     learned: "",
   });
+  const [dates, setDates] = useState<Date[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -73,8 +74,17 @@ export default function Home() {
   }, [session?.user?.email]);
 
   useEffect(() => {
-    console.log(userData);
+    // console.log(userData);
+    const tempDates: SetStateAction<Date[]> = [];
+    userData.forEach((date) => {
+      tempDates.push(date.date);
+    });
+    setDates(tempDates);
   }, [userData]);
+
+  useEffect(() => {
+    console.log(dates);
+  }, [dates]);
 
   useEffect(() => {
     const dataDate = userData.find(
@@ -316,7 +326,16 @@ export default function Home() {
                   </Button>
                 </FormGroup>
                 <div className={styles.calender_section}>
-                  <Calendar onChange={onChange} value={value} />
+                  <Calendar
+                    onChange={onChange}
+                    value={value}
+                    tileClassName={({ date }) => {
+                      if (dates.find((x) => x.getTime() === date.getTime())) {
+                        let highlight: string = "highlight";
+                        return highlight;
+                      }
+                    }}
+                  />
                 </div>
               </>
             )}
