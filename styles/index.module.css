@@ -62,3 +62,15 @@
     background-color: green !important;
 }
 
+.title {
+    margin: 70px 0px;
+    width: 100%;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.title h1 {
+    font-size: 100px;
+    font-weight: bold;
+}

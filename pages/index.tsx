@@ -26,6 +26,7 @@ import {
 import db from "../firebase/config";
 import Image from "next/image";
 import Calendar, { CalendarTileProperties } from "react-calendar";
+import { Saira } from "@next/font/google";
 import "react-calendar/dist/Calendar.css";
 import { SetStateAction, useEffect, useState } from "react";
 
@@ -48,6 +49,8 @@ type FormType = {
   learned: string;
 };
 
+const saira = Saira();
+
 export default function Home() {
   const darkTheme = createTheme({
     palette: {
@@ -67,6 +70,9 @@ export default function Home() {
   });
   const [dates, setDates] = useState<Date[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [workedOnError, setWorkedOnError] = useState(false);
+  const [hoursError, setHoursError] = useState(false);
+  const [factsError, setFactsError] = useState(false);
 
   useEffect(() => {
     getData();
@@ -108,6 +114,18 @@ export default function Home() {
     setFormData(obj);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+
+  useEffect(() => {
+    if (formData.hours > 0) {
+      setHoursError(false);
+    }
+    if (formData.worked_on.length > 0) {
+      setWorkedOnError(false);
+    }
+    if (formData.learned.length > 0) {
+      setFactsError(false);
+    }
+  }, [formData.hours, formData.worked_on, formData.learned]);
 
   if (status !== "authenticated") {
     return (
@@ -159,9 +177,22 @@ export default function Home() {
   };
 
   const handleSubmit = () => {
+    // Validation
+    if (
+      formData.hours < 1 ||
+      formData.worked_on.length === 0 ||
+      formData.learned.length === 0
+    ) {
+      if (formData.hours < 1) setHoursError(true);
+      if (formData.worked_on.length === 0) setWorkedOnError(true);
+      if (formData.learned.length === 0) setFactsError(true);
+      return;
+    }
+
     const dataDate = userData.find(
       (element) => element.date.getDate() === value.getDate()
     );
+    // If doesn't exists date for user
     if (!dataDate) {
       const colRef = doc(collection(db, "calender"));
       setDoc(colRef, {
@@ -172,6 +203,9 @@ export default function Home() {
         leetcode: formData.leetcode,
         link: formData.link,
         worked_on: formData.worked_on,
+      }).then(() => {
+        console.log("Document Added");
+        getData();
       });
       return;
     }
@@ -280,28 +314,54 @@ export default function Home() {
               </ul>
             </div>
           </div>
+          <div className={styles.title}>
+            <h1 className={saira.className}>Coding Practice Tracker</h1>
+          </div>
           <div className={styles.main_section}>
             {isLoading ? (
               <CircularProgress />
             ) : (
               <>
                 <FormGroup className={styles.form_section}>
-                  <TextField
-                    required
-                    id="outlined-required"
-                    label="What did you work on"
-                    multiline
-                    rows={2}
-                    value={formData.worked_on}
-                    onChange={handleWorkedOnChange}
-                  />
-                  <TextField
-                    required
-                    id="outlined-required"
-                    label="How many hours"
-                    value={formData.hours}
-                    onChange={handleHoursChange}
-                  />
+                  {!workedOnError ? (
+                    <TextField
+                      required
+                      id="outlined-required"
+                      label="What did you work on"
+                      multiline
+                      rows={2}
+                      value={formData.worked_on}
+                      onChange={handleWorkedOnChange}
+                    />
+                  ) : (
+                    <TextField
+                      error
+                      id="outlined-error-helper-text"
+                      label="What did you work on"
+                      value={formData.worked_on}
+                      helperText="You must work on something"
+                      onChange={handleWorkedOnChange}
+                    />
+                  )}
+                  {!hoursError ? (
+                    <TextField
+                      required
+                      id="outlined-required"
+                      label="How many hours"
+                      value={formData.hours}
+                      onChange={handleHoursChange}
+                    />
+                  ) : (
+                    <TextField
+                      error
+                      id="outlined-error-helper-text"
+                      label="Error"
+                      value={formData.hours}
+                      helperText="Hours must be greater than 0"
+                      onChange={handleHoursChange}
+                    />
+                  )}
+
                   <TextField
                     id="outlined-required"
                     label="Leet Code Question"
@@ -316,15 +376,27 @@ export default function Home() {
                     value={formData.link}
                     onChange={handleLinkChange}
                   />
-                  <TextField
-                    required
-                    id="outlined-required"
-                    label="Fact you learned today"
-                    multiline
-                    rows={4}
-                    value={formData.learned}
-                    onChange={handleLearnedChange}
-                  />
+                  {!factsError ? (
+                    <TextField
+                      required
+                      id="outlined-required"
+                      label="Fact you learned today"
+                      multiline
+                      rows={4}
+                      value={formData.learned}
+                      onChange={handleLearnedChange}
+                    />
+                  ) : (
+                    <TextField
+                      error
+                      id="outlined-error-helper-text"
+                      label="Fact you learned today"
+                      value={formData.learned}
+                      onChange={handleLearnedChange}
+                      helperText="You must learn something"
+                    />
+                  )}
+
                   <Button variant="contained" onClick={handleSubmit}>
                     Submit
                   </Button>
