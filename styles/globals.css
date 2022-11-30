@@ -20,6 +20,11 @@ a {
   background-color: rgb(123, 240, 123) !important;
 }
 
+.react-calendar {
+  width: 600px !important; 
+  height: fit-content;
+}
+
 @media (prefers-color-scheme: dark) {
 
   body {

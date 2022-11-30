@@ -16,6 +16,7 @@ import {
 import styles from "../styles/index.module.css";
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   query,
@@ -228,6 +229,28 @@ export default function Home() {
     });
   };
 
+  const handleDelete = () => {
+    const dataDate = userData.find(
+      (element) => element.date.getDate() === value.getDate()
+    );
+
+    if (!dataDate) return;
+
+    const colRef = doc(db, "calender", dataDate?.id);
+    deleteDoc(colRef).then(() => {
+      setFormData({
+        hours: 0,
+        leetcode: "",
+        link: "",
+        worked_on: "",
+        learned: "",
+      });
+      console.log("Document Deleted");
+      getData();
+    });
+    return;
+  };
+
   const handleWorkedOnChange = (
     event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
   ) => {
@@ -396,10 +419,18 @@ export default function Home() {
                       helperText="You must learn something"
                     />
                   )}
-
-                  <Button variant="contained" onClick={handleSubmit}>
-                    Submit
-                  </Button>
+                  <div className={styles.button_group}>
+                    <Button variant="contained" onClick={handleSubmit}>
+                      Submit
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="error"
+                      onClick={handleDelete}
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </FormGroup>
                 <div className={styles.calender_section}>
                   <Calendar

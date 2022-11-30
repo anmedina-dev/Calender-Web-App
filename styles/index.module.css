@@ -54,8 +54,7 @@
 
 .calender_section {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    padding-top: 200px;
 }
 
 .highlight {
@@ -73,4 +72,13 @@
 .title h1 {
     font-size: 100px;
     font-weight: bold;
+}
+
+.button_group {
+    display: flex;
+    flex-wrap: wrap;
+}
+.button_group>*{
+    margin: 8px 0;
+    width: 100%;
 }
