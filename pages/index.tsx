@@ -50,7 +50,7 @@ type FormType = {
   learned: string;
 };
 
-const saira = Saira();
+const saira = Saira({ subsets: ["latin"] });
 
 export default function Home() {
   const darkTheme = createTheme({
