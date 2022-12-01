@@ -80,6 +80,6 @@
     flex-wrap: wrap;
 }
 .button_group>*{
-    margin: 8px 0;
+    margin: 8px 0 !important;
     width: 100%;
 }
