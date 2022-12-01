@@ -49,7 +49,7 @@
 }
 
 .form_section>*{
-    margin: 15px;
+    margin: 15px !important;
 }
 
 .calender_section {
@@ -72,6 +72,7 @@
 .title h1 {
     font-size: 100px;
     font-weight: bold;
+    color: black !important;
 }
 
 .button_group {
