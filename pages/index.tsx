@@ -90,7 +90,7 @@ export default function Home() {
 
   useEffect(() => {
     const dataDate = userData.find(
-      (element) => element.date.getDate() === value.getDate()
+      (element) => element.date.getTime() === value.getTime()
     );
 
     if (!dataDate) {
